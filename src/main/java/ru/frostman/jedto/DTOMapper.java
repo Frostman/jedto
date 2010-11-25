@@ -2,18 +2,28 @@ package ru.frostman.jedto;
 
 import ru.frostman.jedto.annotations.MapDTO;
 
-import java.lang.reflect.Field;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author slukjanov aka Frostman
  */
 public class DTOMapper {
+    private Set<String> mappedClassesSet = new LinkedHashSet<String>();
+    private Set<String> dtoClassesSet = new LinkedHashSet<String>();
+
+    private Map<String, String> mappedClasses = new LinkedHashMap<String, String>();
+
+    private volatile boolean ready;
 
     public DTOMapper() {
     }
 
-    public void map(Class from) {
+    public synchronized void map(Class from) {
+        ready = false;
+
         if (from == null) {
             throw new IllegalArgumentException("Mapped class can't be null");
         }
@@ -28,8 +38,34 @@ public class DTOMapper {
             throw new IllegalArgumentException("MapTo class can't be null");
         }
 
-        List<Field> fields = ReflectionUtil.getDeclaredAndInheritedFields(from);
+        if (mappedClassesSet.contains(from.getName())) {
+            throw new IllegalArgumentException("Class \"" + from.getName() + "\" is already mapped");
+        }
+
+        if (dtoClassesSet.contains(from.getName())) {
+            throw new IllegalArgumentException("Class \"" + from.getName() + "\" is already mapped as dto");
+        }
+
+        if (mappedClassesSet.contains(to.getName())) {
+            throw new IllegalArgumentException("Class \"" + from.getName() + "\" is already mapped");
+        }
+
+        if (dtoClassesSet.contains(to.getName())) {
+            throw new IllegalArgumentException("Class \"" + from.getName() + "\" is already mapped as dto");
+        }
+
+        mappedClassesSet.add(from.getName());
+        dtoClassesSet.add(to.getName());
+        mappedClasses.put(from.getName(), to.getName());
+    }
+
+    public synchronized void prepare() {
+        if (ready) {
+            return;
+        }
 
 
+
+        ready = true;
     }
 }

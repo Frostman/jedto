@@ -37,4 +37,11 @@ public class ReflectionUtil {
         return fields;
     }
 
+    public static String getFieldGetterName(Field field) {
+        boolean isBooleanPrimitive = field.getType() == boolean.class;
+
+        String fieldName = field.getName();
+        fieldName = Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+        return isBooleanPrimitive ? "is" : "get" + fieldName;
+    }
 }
