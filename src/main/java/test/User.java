@@ -2,15 +2,15 @@ package test;
 
 import ru.frostman.jedto.annotations.MapDTO;
 import ru.frostman.jedto.annotations.MapTo;
-import ru.frostman.jedto.annotations.NotMap;
+import ru.frostman.jedto.annotations.Transform;
 
 /**
  * @author slukjanov aka Frostman
  */
 @MapDTO(UserDTO.class)
 public class User {
-    @NotMap
-    private String id;
+    @Transform(ObjectIdTransformer.class)
+    private ObjectId id;
 
     private String login;
 
@@ -22,7 +22,15 @@ public class User {
     public User() {
     }
 
-//    public String getLogin() {
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setId(ObjectId id) {
+        this.id = id;
+    }
+
+    //    public String getLogin() {
 //        return login;
 //    }
 

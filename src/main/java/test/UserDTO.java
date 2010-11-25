@@ -4,6 +4,7 @@ package test;
  * @author slukjanov aka Frostman
  */
 public class UserDTO {
+    private String id;
     private String login;
     private String pswd;
 
