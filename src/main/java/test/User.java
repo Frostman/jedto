@@ -1,6 +1,7 @@
 package test;
 
 import ru.frostman.jedto.annotations.MapDTO;
+import ru.frostman.jedto.annotations.MapTo;
 
 /**
  * @author slukjanov aka Frostman
@@ -8,6 +9,8 @@ import ru.frostman.jedto.annotations.MapDTO;
 @MapDTO(UserDTO.class)
 public class User {
     private String login;
+
+    @MapTo("pswd")
     private String password;
 
     public User() {

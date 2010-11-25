@@ -9,5 +9,7 @@ public class Test {
     public static void main(String[] args) {
         DTOMapper dtoMapper = new DTOMapper();
         dtoMapper.map(User.class);
+
+        dtoMapper.prepare();
     }
 }

@@ -1,6 +1,12 @@
 package ru.frostman.jedto;
 
+import net.sf.cglib.reflect.FastClass;
+import ru.frostman.jedto.accessors.FieldAccessor;
+import ru.frostman.jedto.accessors.FieldAccessorFactory;
 import ru.frostman.jedto.annotations.MapDTO;
+import ru.frostman.jedto.annotations.MapTo;
+import ru.frostman.jedto.annotations.NotMap;
+import ru.frostman.jedto.util.ReflectionUtil;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -31,6 +37,8 @@ public class DTOMapper {
         if (!from.isAnnotationPresent(MapDTO.class)) {
             throw new IllegalArgumentException("Mapped class must be annotated with @MapDTO");
         }
+
+        @SuppressWarnings({"unchecked"})
         MapDTO mapDTOAn = (MapDTO) from.getAnnotation(MapDTO.class);
         Class to = mapDTOAn.value();
 
@@ -80,9 +88,40 @@ public class DTOMapper {
 
     private void prepareClassPair(Class from, Class to) {
         List<Field> fromFields = ReflectionUtil.getDeclaredAndInheritedFields(from);
+        List<Field> toFields = ReflectionUtil.getDeclaredAndInheritedFields(to);
+        Map<String, Field> toFieldsMap = new LinkedHashMap<String, Field>();
+        for (Field field : toFields) {
+            toFieldsMap.put(field.getName(), field);
+        }
 
-        for(Field field:fromFields) {
+        FastClass fcFrom = FastClass.create(from), fcTo = FastClass.create(to);
 
+        for (Field fromField : fromFields) {
+            if (fromField.isAnnotationPresent(NotMap.class)) {
+                continue;
+            }
+
+            String toFieldName = fromField.getName();
+            if (fromField.isAnnotationPresent(MapTo.class)) {
+                MapTo mapToAn = fromField.getAnnotation(MapTo.class);
+                toFieldName = mapToAn.value();
+            }
+
+            if (!toFieldsMap.containsKey(toFieldName)) {
+                //todo another exception
+                throw new IllegalArgumentException("Class \"" + to.getName() +
+                        "\" isn't contains field \"" + toFieldName + "\"");
+            }
+
+            Field toField = toFieldsMap.get(toFieldName);
+
+            FieldAccessor fromFieldAccessor = FieldAccessorFactory.create(fromField, fcFrom);
+            FieldAccessor toFieldAccessor = FieldAccessorFactory.create(toField, fcTo);
+
+
+
+            //todo log it to debug or trace
+            System.out.println(fromField + " -> " + toField);
         }
     }
 }
