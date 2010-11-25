@@ -2,15 +2,15 @@ package ru.frostman.jedto;
 
 import ru.frostman.jedto.annotations.MapDTO;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.Field;
+import java.util.*;
 
 /**
  * @author slukjanov aka Frostman
  */
 public class DTOMapper {
+    public static final String GENERATE_VALUE = "";
+
     private Set<String> mappedClassesSet = new LinkedHashSet<String>();
     private Set<String> dtoClassesSet = new LinkedHashSet<String>();
 
@@ -64,8 +64,25 @@ public class DTOMapper {
             return;
         }
 
+        try {
+            for (Map.Entry<String, String> entry : mappedClasses.entrySet()) {
+                Class from = Class.forName(entry.getKey());
+                Class to = Class.forName(entry.getValue());
 
+                prepareClassPair(from, to);
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
 
         ready = true;
+    }
+
+    private void prepareClassPair(Class from, Class to) {
+        List<Field> fromFields = ReflectionUtil.getDeclaredAndInheritedFields(from);
+
+        for(Field field:fromFields) {
+
+        }
     }
 }
