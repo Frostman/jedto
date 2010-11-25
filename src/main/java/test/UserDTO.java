@@ -4,8 +4,11 @@ package test;
  * @author slukjanov aka Frostman
  */
 public class UserDTO {
+    private String id;
     private String login;
-    private String password;
+    private String pswd;
+
+    private UserDTO user;
 
     public UserDTO() {
     }
@@ -18,11 +21,11 @@ public class UserDTO {
         this.login = login;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPswd() {
+        return pswd;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPswd(String pswd) {
+        this.pswd = pswd;
     }
 }

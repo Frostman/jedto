@@ -1,4 +1,4 @@
-package ru.frostman.jedto;
+package ru.frostman.jedto.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -26,6 +26,7 @@ public class ReflectionUtil {
         fields = getDeclaredAndInheritedFields(superClass, fields);
 
         for (Field field : type.getDeclaredFields()) {
+            field.setAccessible(true);
             int fieldModifiers = field.getModifiers();
             if (Modifier.isFinal(fieldModifiers)) {
                 continue;
@@ -43,5 +44,11 @@ public class ReflectionUtil {
         String fieldName = field.getName();
         fieldName = Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
         return isBooleanPrimitive ? "is" : "get" + fieldName;
+    }
+
+    public static String getFieldSetterName(Field field) {
+        String fieldName = field.getName();
+        fieldName = Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+        return "set" + fieldName;
     }
 }
