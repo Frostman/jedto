@@ -92,7 +92,7 @@ public class DTOMapper {
             for (FieldConverter fieldConverter : converter.getFieldConverters()) {
                 Object t = toDTO(fieldConverter.getMainField().getValue(object));
                 if (fieldConverter.getTransformer() != null) {
-                    //todo think about прямое трасформирование и обратное
+                    //todo think about direct and inverse transformation
                     t = fieldConverter.getTransformer().transformFirst(t);
                 }
                 fieldConverter.getDtoField().setValue(dto, t);
@@ -125,7 +125,7 @@ public class DTOMapper {
             for (FieldConverter fieldConverter : converter.getFieldConverters()) {
                 Object t = fromDTO(fieldConverter.getDtoField().getValue(dto));
                 if (fieldConverter.getTransformer() != null) {
-                    //todo think about прямое трасформирование и обратное
+                    //todo think about direct and inverse transformation
                     t = fieldConverter.getTransformer().transformSecond(t);
                 }
                 fieldConverter.getMainField().setValue(object, t);
