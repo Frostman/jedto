@@ -6,6 +6,8 @@ import ru.frostman.jedto.accessors.FieldAccessorFactory;
 import ru.frostman.jedto.annotations.MapDTO;
 import ru.frostman.jedto.annotations.MapTo;
 import ru.frostman.jedto.annotations.NotMap;
+import ru.frostman.jedto.util.ClassConverter;
+import ru.frostman.jedto.util.FieldConverter;
 import ru.frostman.jedto.util.ReflectionUtil;
 
 import java.lang.reflect.Field;
@@ -15,20 +17,21 @@ import java.util.*;
  * @author slukjanov aka Frostman
  */
 public class DTOMapper {
-    public static final String GENERATE_VALUE = "";
-
     private Set<String> mappedClassesSet = new LinkedHashSet<String>();
     private Set<String> dtoClassesSet = new LinkedHashSet<String>();
 
     private Map<String, String> mappedClasses = new LinkedHashMap<String, String>();
 
-    private volatile boolean ready;
+    private Map<String, ClassConverter> mappingByMainClass;
+    private Map<String, ClassConverter> mappingByDTOClass;
+
+    private volatile boolean prepared;
 
     public DTOMapper() {
     }
 
     public synchronized void map(Class from) {
-        ready = false;
+        prepared = false;
 
         if (from == null) {
             throw new IllegalArgumentException("Mapped class can't be null");
@@ -67,26 +70,44 @@ public class DTOMapper {
         mappedClasses.put(from.getName(), to.getName());
     }
 
+    //todo think about type-safe method
+    //todo think about synchronization
+    public Object toDTO(Object object) {
+        return object;
+    }
+
+    //todo think about type-safe method
+    //todo think about synchronization
+    public Object fromDTO(Object dto) {
+        return dto;
+    }
+
     public synchronized void prepare() {
-        if (ready) {
+        if (prepared) {
             return;
         }
+
+        mappingByMainClass = new LinkedHashMap<String, ClassConverter>();
+        mappingByDTOClass = new LinkedHashMap<String, ClassConverter>();
 
         try {
             for (Map.Entry<String, String> entry : mappedClasses.entrySet()) {
                 Class from = Class.forName(entry.getKey());
                 Class to = Class.forName(entry.getValue());
 
-                prepareClassPair(from, to);
+                ClassConverter classConverter = prepareClassPair(from, to);
+                mappingByMainClass.put(from.getName(), classConverter);
+                mappingByDTOClass.put(to.getName(), classConverter);
             }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            //todo it's not good
+            throw new RuntimeException(e);
         }
 
-        ready = true;
+        prepared = true;
     }
 
-    private void prepareClassPair(Class from, Class to) {
+    private ClassConverter prepareClassPair(Class from, Class to) {
         List<Field> fromFields = ReflectionUtil.getDeclaredAndInheritedFields(from);
         List<Field> toFields = ReflectionUtil.getDeclaredAndInheritedFields(to);
         Map<String, Field> toFieldsMap = new LinkedHashMap<String, Field>();
@@ -95,6 +116,7 @@ public class DTOMapper {
         }
 
         FastClass fcFrom = FastClass.create(from), fcTo = FastClass.create(to);
+        List<FieldConverter> fieldConverters = new LinkedList<FieldConverter>();
 
         for (Field fromField : fromFields) {
             if (fromField.isAnnotationPresent(NotMap.class)) {
@@ -115,13 +137,21 @@ public class DTOMapper {
 
             Field toField = toFieldsMap.get(toFieldName);
 
+            if (!fromField.getType().equals(toField.getType())
+                    && !mappedClasses.get(fromField.getType().getName()).equals(toField.getType().getName())) {
+                throw new IllegalArgumentException("Can't transform " + fromField.getType() + " to " + toField.getType());
+            }
+
             FieldAccessor fromFieldAccessor = FieldAccessorFactory.create(fromField, fcFrom);
             FieldAccessor toFieldAccessor = FieldAccessorFactory.create(toField, fcTo);
 
-
+            FieldConverter fieldConverter = new FieldConverter(fromFieldAccessor, toFieldAccessor);
+            fieldConverters.add(fieldConverter);
 
             //todo log it to debug or trace
             System.out.println(fromField + " -> " + toField);
         }
+
+        return new ClassConverter(from, to, fieldConverters);
     }
 }

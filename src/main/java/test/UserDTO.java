@@ -7,6 +7,8 @@ public class UserDTO {
     private String login;
     private String pswd;
 
+    private UserDTO user;
+
     public UserDTO() {
     }
 

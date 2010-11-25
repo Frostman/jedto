@@ -28,14 +28,28 @@ public class SimpleFieldAccessor implements FieldAccessor {
 
         field.setAccessible(true);
 
-        getter = fastClass.getMethod(ReflectionUtil.getFieldGetterName(field), new Class[]{});
-        setter = fastClass.getMethod(ReflectionUtil.getFieldSetterName(field), new Class[]{field.getType()});
+        //todo log if can't access getter or setter
+        try {
+            getter = fastClass.getMethod(ReflectionUtil.getFieldGetterName(field), new Class[]{});
+        } catch (Throwable e) {
+            //no operation
+        }
+
+        try {
+            setter = fastClass.getMethod(ReflectionUtil.getFieldSetterName(field), new Class[]{field.getType()});
+        } catch (Throwable e) {
+            //no operation
+        }
     }
 
     public Object getValue(Object instance) {
         try {
+            if (getter != null) {
+                return getter.invoke(instance, new Object[]{});
+            }
+
             return field.get(instance);
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             //todo is it good?
             throw new RuntimeException(e);
         }
@@ -43,10 +57,19 @@ public class SimpleFieldAccessor implements FieldAccessor {
 
     public void setValue(Object instance, Object newValue) {
         try {
+            if (setter != null) {
+                setter.invoke(instance, new Object[]{newValue});
+                return;
+            }
+
             field.set(instance, newValue);
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             //todo impl is is good?
             throw new RuntimeException(e);
         }
+    }
+
+    public Class getType() {
+        return field.getType();
     }
 }
