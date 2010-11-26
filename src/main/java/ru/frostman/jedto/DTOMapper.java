@@ -72,11 +72,21 @@ public class DTOMapper {
         mappedClasses.put(from.getName(), to.getName());
     }
 
-    //todo think about type-safe method
-    //todo think about synchronization
-    public Object toDTO(Object object) {
+    public synchronized Object toDTO(Object object) {
+        return toDTO(object, null);
+    }
+
+    private synchronized Object toDTO(Object object, Map<Object, Object> transformed) {
         if (object == null) {
             return null;
+        }
+
+        if (transformed == null) {
+            transformed = new LinkedHashMap<Object, Object>();
+        }
+
+        if (transformed.containsKey(object)) {
+            return transformed.get(object);
         }
 
         ClassConverter converter = mappingByMainClass.get(object.getClass().getName());
@@ -88,12 +98,11 @@ public class DTOMapper {
 
         try {
             Object dto = converter.getDtoClass().newInstance();
-
+            transformed.put(object, dto);
             for (FieldConverter fieldConverter : converter.getFieldConverters()) {
-                Object t = toDTO(fieldConverter.getMainField().getValue(object));
+                Object t = toDTO(fieldConverter.getMainField().getValue(object), transformed);
                 if (fieldConverter.getTransformer() != null) {
-                    //todo think about direct and inverse transformation
-                    t = fieldConverter.getTransformer().transformFirst(t);
+                    t = fieldConverter.getTransformer().transformDirect(t);
                 }
                 fieldConverter.getDtoField().setValue(dto, t);
             }
@@ -105,11 +114,21 @@ public class DTOMapper {
         }
     }
 
-    //todo think about type-safe method
-    //todo think about synchronization
-    public Object fromDTO(Object dto) {
+    public synchronized Object fromDTO(Object dto) {
+        return fromDTO(dto, null);
+    }
+
+    public synchronized Object fromDTO(Object dto, Map<Object, Object> transformed) {
         if (dto == null) {
             return null;
+        }
+
+        if (transformed == null) {
+            transformed = new LinkedHashMap<Object, Object>();
+        }
+
+        if (transformed.containsKey(dto)) {
+            return transformed.get(dto);
         }
 
         ClassConverter converter = mappingByDTOClass.get(dto.getClass().getName());
@@ -121,12 +140,11 @@ public class DTOMapper {
 
         try {
             Object object = converter.getMainClass().newInstance();
-
+            transformed.put(dto, object);
             for (FieldConverter fieldConverter : converter.getFieldConverters()) {
-                Object t = fromDTO(fieldConverter.getDtoField().getValue(dto));
+                Object t = fromDTO(fieldConverter.getDtoField().getValue(dto), transformed);
                 if (fieldConverter.getTransformer() != null) {
-                    //todo think about direct and inverse transformation
-                    t = fieldConverter.getTransformer().transformSecond(t);
+                    t = fieldConverter.getTransformer().transformInverse(t);
                 }
                 fieldConverter.getMainField().setValue(object, t);
             }

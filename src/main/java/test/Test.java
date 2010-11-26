@@ -20,6 +20,7 @@ public class Test {
         u2.setLogin("uuuuu2");
         u2.setPassword("ppppp2");
         user.setUser(u2);
+        u2.setUser(user);
 
         UserDTO userDTO = (UserDTO) dtoMapper.toDTO(user);
         System.out.println(userDTO);

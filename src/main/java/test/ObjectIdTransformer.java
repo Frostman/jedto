@@ -5,18 +5,19 @@ import ru.frostman.jedto.transformation.Transformer;
 /**
  * @author slukjanov aka Frostman
  */
-public class ObjectIdTransformer implements Transformer<ObjectId, String> {
-    public String transformFirst(ObjectId objectId) {
-        if (objectId == null) {
+public class ObjectIdTransformer implements Transformer {
+    public Object transformDirect(Object objectId) {
+        if (objectId == null || !(objectId instanceof ObjectId)) {
             return null;
         }
-        return objectId.getOid();
+
+        return ((ObjectId) objectId).getOid();
     }
 
-    public ObjectId transformSecond(String s) {
-        if (s == null) {
+    public Object transformInverse(Object s) {
+        if (s == null || !(s instanceof String)) {
             return null;
         }
-        return new ObjectId(s);
+        return new ObjectId((String) s);
     }
 }
