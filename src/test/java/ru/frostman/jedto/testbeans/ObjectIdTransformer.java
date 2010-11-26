@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
-package ru.frostman.jedto.annotations;
+package ru.frostman.jedto.testbeans;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import ru.frostman.jedto.transformation.Transformer;
 
 /**
  * @author slukjanov aka Frostman
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface MapDTO {
-    Class<?> value();
+public class ObjectIdTransformer implements Transformer {
+    public Object transformDirect(Object objectId) {
+        if (objectId == null || !(objectId instanceof ObjectId)) {
+            return null;
+        }
+
+        return ((ObjectId) objectId).getOid();
+    }
+
+    public Object transformInverse(Object s) {
+        if (s == null || !(s instanceof String)) {
+            return null;
+        }
+        return new ObjectId((String) s);
+    }
 }

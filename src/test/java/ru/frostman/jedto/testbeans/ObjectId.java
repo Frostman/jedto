@@ -14,18 +14,31 @@
  * limitations under the License.
  */
 
-package ru.frostman.jedto.annotations;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package ru.frostman.jedto.testbeans;
 
 /**
  * @author slukjanov aka Frostman
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface MapDTO {
-    Class<?> value();
+public class ObjectId {
+    private String oid;
+
+    public ObjectId() {
+    }
+
+    public ObjectId(String oid) {
+        this.oid = oid;
+    }
+
+    public String getOid() {
+        return oid;
+    }
+
+    public void setOid(String oid) {
+        this.oid = oid;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return !(obj == null || !(obj instanceof ObjectId)) && ((ObjectId) obj).getOid().equals(oid);
+    }
 }
