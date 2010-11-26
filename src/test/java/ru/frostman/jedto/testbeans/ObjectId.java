@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package test;
+package ru.frostman.jedto.testbeans;
 
 /**
  * @author slukjanov aka Frostman
@@ -35,5 +35,10 @@ public class ObjectId {
 
     public void setOid(String oid) {
         this.oid = oid;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return !(obj == null || !(obj instanceof ObjectId)) && ((ObjectId) obj).getOid().equals(oid);
     }
 }
