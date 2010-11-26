@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package test;
+package ru.frostman.jedto.testbeans;
 
 import ru.frostman.jedto.annotations.MapDTO;
 import ru.frostman.jedto.annotations.MapTo;
@@ -38,17 +38,23 @@ public class User {
     public User() {
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public User(UserDTO userDTO) {
+        this.id = new ObjectId(userDTO.getId());
+        this.login = userDTO.getLogin();
+        this.password = userDTO.getPswd();
+    }
+
+    public ObjectId getId() {
+        return id;
     }
 
     public void setId(ObjectId id) {
         this.id = id;
     }
 
-    //    public String getLogin() {
-//        return login;
-//    }
+    public String getLogin() {
+        return login;
+    }
 
     public void setLogin(String login) {
         this.login = login;
@@ -60,5 +66,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

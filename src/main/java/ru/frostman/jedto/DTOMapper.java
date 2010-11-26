@@ -48,7 +48,14 @@ public class DTOMapper {
     public DTOMapper() {
     }
 
-    public synchronized void map(Class from) {
+    public synchronized DTOMapper map(Class... fromClasses) {
+        for (Class from : fromClasses) {
+            map(from);
+        }
+        return this;
+    }
+
+    public synchronized DTOMapper map(Class from) {
         prepared = false;
 
         if (from == null) {
@@ -86,6 +93,8 @@ public class DTOMapper {
         mappedClassesSet.add(from.getName());
         dtoClassesSet.add(to.getName());
         mappedClasses.put(from.getName(), to.getName());
+
+        return this;
     }
 
     public synchronized Object toDTO(Object object) {
@@ -93,6 +102,10 @@ public class DTOMapper {
     }
 
     private synchronized Object toDTO(Object object, Map<Object, Object> transformed) {
+        if (!prepared) {
+            prepare();
+        }
+
         if (object == null) {
             return null;
         }
@@ -135,6 +148,10 @@ public class DTOMapper {
     }
 
     public synchronized Object fromDTO(Object dto, Map<Object, Object> transformed) {
+        if (!prepared) {
+            prepare();
+        }
+
         if (dto == null) {
             return null;
         }
